@@ -1,12 +1,1 @@
-﻿app/(dashboard)/importar/page.tsx(131,9): error TS2353: Object literal may only specify known properties, and 'promesas' does not exist in type 'ImportResult | ((prevState: ImportResult | null) => ImportResult | null)'.
-app/(dashboard)/importar/page.tsx(598,84): error TS2339: Property 'promesas' does not exist on type 'ImportResult'.
-app/(dashboard)/importar/page.tsx(602,84): error TS2339: Property 'seguimientos' does not exist on type 'ImportResult'.
-app/(dashboard)/importar/page.tsx(644,34): error TS2552: Cannot find name 'User'. Did you mean 'user'?
-app/(dashboard)/importar/page.tsx(645,36): error TS2339: Property 'nombre' does not exist on type '{ row: number; message: string; }'.
-app/(dashboard)/importar/page.tsx(649,38): error TS2339: Property 'campo' does not exist on type '{ row: number; message: string; }'.
-app/(dashboard)/importar/page.tsx(656,36): error TS2339: Property 'sugerencia' does not exist on type '{ row: number; message: string; }'.
-src/application/client/ClientService.ts(211,57): error TS2339: Property 'clientesGuardados' does not exist on type '{ creados: number; actualizados: number; errores: any[]; }'.
-src/application/client/ClientService.ts(224,35): error TS7006: Parameter 'c' implicitly has an 'any' type.
-src/application/client/ClientService.ts(315,7): error TS2353: Object literal may only specify known properties, and 'totalProcesados' does not exist in type '{ creados: number; actualizados: number; errores: any[]; }'.
-src/infrastructure/persistence/ClientRepository.ts(144,54): error TS2353: Object literal may only specify known properties, and 'clientesGuardados' does not exist in type '{ creados: number; actualizados: number; errores: any[]; }'.
-src/infrastructure/persistence/ClientRepository.ts(162,7): error TS2353: Object literal may only specify known properties, and 'clientesGuardados' does not exist in type '{ creados: number; actualizados: number; errores: any[]; }'.
+No TypeScript compilation errors. Build passed on 2026-05-22.

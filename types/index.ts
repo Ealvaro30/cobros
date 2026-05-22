@@ -64,7 +64,8 @@ export interface Cliente {
   fecha_promesa: string | null;
   monto_promesa: number;
   direccion: string | null;
-  correo: string | null;
+  unica_operacion: boolean;
+  prioridad: 'baja' | 'media' | 'alta' | 'urgente';
   empresa: string | null;
   observaciones: string | null;
   monto_recuperado: number;

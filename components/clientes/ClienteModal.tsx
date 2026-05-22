@@ -44,6 +44,8 @@ export function ClienteModal({ cliente, onClose }: ClienteModalProps) {
       bucket: 5,
       estado: 'NO CONTESTA',
       promesa_pago: false,
+      unica_operacion: false,
+      prioridad: 'media',
     },
   });
 
@@ -64,7 +66,8 @@ export function ClienteModal({ cliente, onClose }: ClienteModalProps) {
         estado: cliente.estado,
         promesa_pago: cliente.promesa_pago,
         fecha_promesa: cliente.fecha_promesa || '',
-        correo: cliente.correo || '',
+        unica_operacion: cliente.unica_operacion || false,
+        prioridad: cliente.prioridad || 'media',
         empresa: cliente.empresa || '',
         campana_id: cliente.campana_id || '',
         observaciones: cliente.observaciones || '',
@@ -143,7 +146,8 @@ export function ClienteModal({ cliente, onClose }: ClienteModalProps) {
         agente_id: data.agente_id === '' ? undefined : (data.agente_id || undefined),
         campana_id: data.campana_id === '' ? undefined : (data.campana_id || undefined),
         fecha_promesa: data.fecha_promesa === '' ? undefined : (data.fecha_promesa || undefined),
-        correo: data.correo === '' ? undefined : (data.correo || undefined),
+        unica_operacion: data.unica_operacion,
+        prioridad: data.prioridad,
         empresa: data.empresa || undefined,
         observaciones: operacionesLocal.length > 0 ? JSON.stringify({ ops: operacionesLocal }) : (data.observaciones || undefined),
       };
@@ -201,9 +205,12 @@ export function ClienteModal({ cliente, onClose }: ClienteModalProps) {
               <label className={labelClass}>WhatsApp</label>
               <input {...register('whatsapp')} className={inputClass} placeholder="+50588888888" />
             </div>
-            <div>
-              <label className={labelClass}>Correo</label>
-              <input {...register('correo')} type="email" className={inputClass} placeholder="email@ejemplo.com" />
+            <div className="flex flex-col gap-2">
+              <label className={labelClass}>
+                <input {...register('unica_operacion')} type="checkbox" className="mr-2 rounded border-white/10 bg-slate-900" />
+                Cliente con única operación
+              </label>
+              <p className="text-[10px] text-muted-foreground">Ocultar múltiples operaciones si solo tiene un pago mínimo.</p>
             </div>
             <div>
               <label className={labelClass}>Capital (Córdobas) <span className="text-red-400">*</span></label>
@@ -224,6 +231,15 @@ export function ClienteModal({ cliente, onClose }: ClienteModalProps) {
               <label className={labelClass}>Estado <span className="text-red-400">*</span></label>
               <select {...register('estado')} className="w-full px-3 py-2 bg-slate-900 border border-white/10 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 text-white [&>option]:bg-slate-950 [&>option]:text-white">
                 {ESTADOS.map((e) => <option key={e} value={e}>{e}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className={labelClass}>Prioridad</label>
+              <select {...register('prioridad')} className="w-full px-3 py-2 bg-slate-900 border border-white/10 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 text-white [&>option]:bg-slate-950 [&>option]:text-white">
+                <option value="baja">Baja</option>
+                <option value="media">Media</option>
+                <option value="alta">Alta</option>
+                <option value="urgente">Urgente</option>
               </select>
             </div>
             <div>
@@ -261,7 +277,9 @@ export function ClienteModal({ cliente, onClose }: ClienteModalProps) {
               </div>
               <p className="text-[10px] text-muted-foreground mb-3">Si especifica operaciones, el sistema sumará automáticamente sus capitales y actualizará el campo de "Capital" general.</p>
 
-              {operacionesLocal.length === 0 ? (
+              {!watch('unica_operacion') && (
+                <>
+                  {operacionesLocal.length === 0 ? (
                 <div className="p-4 rounded-xl border border-dashed border-white/5 text-center text-xs text-muted-foreground">
                   No hay operaciones individuales registradas. Se generarán automáticamente a partir del capital.
                 </div>
@@ -315,7 +333,9 @@ export function ClienteModal({ cliente, onClose }: ClienteModalProps) {
                       <span>Total Mínimo: <strong className="text-amber-400 font-mono font-bold">C$ {operacionesLocal.reduce((acc, curr) => acc + curr.montoMinimo, 0).toLocaleString()}</strong></span>
                     </div>
                   </div>
-                </div>
+                  </div>
+                  )}
+                </>
               )}
             </div>
           </div>

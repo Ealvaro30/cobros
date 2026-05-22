@@ -2,16 +2,19 @@
 
 import { useDashboardStats, useBucketStats, useAgentKPIs, useProximasPromesas } from '@/hooks/useDashboard';
 import { useUIStore } from '@/stores/uiStore';
-import { useCampanias } from '@/hooks/useCampanias';
+import { useCampanias, useResumenCampanas } from '@/hooks/useCampanias';
 import { useClientes } from '@/hooks/useClientes';
 import { KPICards } from '@/components/dashboard/KPICards';
 import { BucketSection } from '@/components/dashboard/BucketSection';
-import { AgentRanking } from '@/components/dashboard/AgentRanking';
-import { FinancialCharts } from '@/components/dashboard/FinancialCharts';
-import { CosechasCompliance } from '@/components/dashboard/CosechasCompliance';
+import dynamic from 'next/dynamic';
+
+const AgentRanking = dynamic(() => import('@/components/dashboard/AgentRanking').then(mod => mod.AgentRanking), { ssr: false });
+const FinancialCharts = dynamic(() => import('@/components/dashboard/FinancialCharts').then(mod => mod.FinancialCharts), { ssr: false });
+const CosechasCompliance = dynamic(() => import('@/components/dashboard/CosechasCompliance').then(mod => mod.CosechasCompliance), { ssr: false });
 import { ClientesStatusDetail } from '@/components/dashboard/ClientesStatusDetail';
 import { ProximosClientes } from '@/components/dashboard/ProximosClientes';
 import { OperationalAlerts } from '@/components/dashboard/OperationalAlerts';
+import { CampaignSummaryCard } from '@/components/dashboard/CampaignSummaryCard';
 import { motion } from 'framer-motion';
 
 export default function DashboardPage() {
@@ -22,8 +25,10 @@ export default function DashboardPage() {
   const { data: campanas } = useCampanias();
   const { data: clientes, isLoading: clientesLoading } = useClientes(selectedCampanaId);
   const { data: proximos, isLoading: proximosLoading } = useProximasPromesas();
+  const { data: resumenCampanas, isLoading: resumenLoading } = useResumenCampanas();
 
   const activeCampana = campanas?.find((c) => c.id === selectedCampanaId);
+  const activeResumen = resumenCampanas?.find((c) => c.campana_id === selectedCampanaId);
   const metaBucket5 = activeCampana?.meta_bucket5 || 60000;
   const metaBucket6 = activeCampana?.meta_bucket6 || 40000;
 
@@ -73,14 +78,22 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Agent Ranking & Upcoming Contacts */}
+      {/* Agent Ranking, Upcoming Contacts, and Campaign Summary */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-1">
-          <h2 className="text-lg font-bold mb-4">Ranking de Gestores</h2>
-          <AgentRanking agents={agents} isLoading={agentsLoading} />
+        <div className="lg:col-span-1 space-y-6">
+          <div>
+            <h2 className="text-lg font-bold mb-4">Ranking de Gestores</h2>
+            <AgentRanking agents={agents} isLoading={agentsLoading} />
+          </div>
         </div>
-        <div className="lg:col-span-2">
-          <h2 className="text-lg font-bold mb-4">Agenda y Próximas Gestiones</h2>
+        <div className="lg:col-span-1 space-y-6">
+          <div>
+            <h2 className="text-lg font-bold mb-4">Resumen de Campaña</h2>
+            <CampaignSummaryCard campana={activeResumen} isLoading={resumenLoading} />
+          </div>
+        </div>
+        <div className="lg:col-span-1">
+          <h2 className="text-lg font-bold mb-4">Agenda</h2>
           <ProximosClientes proximos={proximos} isLoading={proximosLoading} />
         </div>
       </div>

@@ -14,7 +14,8 @@ export const clienteSchema = z.object({
   campana_id: z.string().uuid('Campaña inválida').nullable().optional().or(z.literal('')),
   promesa_pago: z.boolean().default(false),
   fecha_promesa: z.string().nullable().optional().or(z.literal('')),
-  correo: z.string().email('Correo inválido').optional().or(z.literal('')),
+  unica_operacion: z.boolean().default(false),
+  prioridad: z.enum(['baja', 'media', 'alta', 'urgente']).default('media'),
   empresa: z.string().optional().or(z.literal('')),
   observaciones: z.string().optional().or(z.literal('')),
 });

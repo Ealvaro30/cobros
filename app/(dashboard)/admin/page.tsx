@@ -6,7 +6,9 @@ import { useAuthStore } from '@/stores/authStore';
 import { useExchangeRate } from '@/hooks/useExchangeRate';
 import { motion } from 'framer-motion';
 import type { Profile } from '@/types';
-import { Shield, Users, UserCog, Loader2, Landmark, CheckCircle } from 'lucide-react';
+import { Shield, Users, UserCog, Loader2, Landmark, CheckCircle, Tag, HandCoins } from 'lucide-react';
+import { EstadoManagementModal } from '@/components/admin/EstadoManagementModal';
+import Link from 'next/link';
 
 export default function AdminPage() {
   const [users, setUsers] = useState<Profile[]>([]);
@@ -27,6 +29,7 @@ export default function AdminPage() {
   const [loadingCompliance, setLoadingCompliance] = useState(true);
   const [savingCompliance, setSavingCompliance] = useState(false);
   const [complianceSuccess, setComplianceSuccess] = useState(false);
+  const [showStateModal, setShowStateModal] = useState(false);
 
   useEffect(() => {
     loadUsers();
@@ -141,6 +144,23 @@ export default function AdminPage() {
           );
         })}
 
+        {/* Dynamic States Settings Card */}
+        <div className="p-4 rounded-xl bg-gradient-to-br from-indigo-950/40 to-violet-950/40 border border-indigo-500/10 flex flex-col justify-between">
+          <div className="flex items-center justify-between mb-2">
+            <Tag className="w-5 h-5 text-indigo-400" />
+            <span className="text-[10px] uppercase font-bold tracking-wider text-indigo-400">Estados</span>
+          </div>
+          <div className="space-y-2">
+            <p className="text-xs text-slate-400 font-medium">Gestión de Estados de Clientes</p>
+            <button
+              onClick={() => setShowStateModal(true)}
+              className="w-full px-3 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-xs rounded-lg transition-colors flex items-center justify-center gap-2"
+            >
+              Configurar Estados
+            </button>
+          </div>
+        </div>
+
         {/* Central Exchange Rate Settings Card */}
         <div className="p-4 rounded-xl bg-gradient-to-br from-blue-955/20 to-cyan-955/20 border border-blue-500/10 flex flex-col justify-between">
           <div className="flex items-center justify-between mb-2">
@@ -173,6 +193,23 @@ export default function AdminPage() {
               </motion.div>
             )}
           </form>
+        </div>
+
+        {/* Dynamic Commissions Link Card */}
+        <div className="p-4 rounded-xl bg-gradient-to-br from-emerald-950/40 to-teal-950/40 border border-emerald-500/10 flex flex-col justify-between">
+          <div className="flex items-center justify-between mb-2">
+            <HandCoins className="w-5 h-5 text-emerald-400" />
+            <span className="text-[10px] uppercase font-bold tracking-wider text-emerald-400">Comisiones</span>
+          </div>
+          <div className="space-y-2">
+            <p className="text-xs text-slate-400 font-medium">Gestión de Tramos y Comisiones</p>
+            <Link
+              href="/admin/comisiones"
+              className="w-full px-3 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs rounded-lg transition-colors flex items-center justify-center gap-2"
+            >
+              Configurar Metas
+            </Link>
+          </div>
         </div>
       </div>
 
@@ -318,6 +355,7 @@ export default function AdminPage() {
           </div>
         )}
       </div>
+      {showStateModal && <EstadoManagementModal onClose={() => setShowStateModal(false)} />}
     </div>
   );
 }

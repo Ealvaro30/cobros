@@ -16,8 +16,9 @@ export interface ClientUseCase {
   importClients(
     campanaId: string,
     rows: ImportClientRow[],
-    usuarioId: string
-  ): Promise<{ creados: number; actualizados: number; errores: any[] }>;
+    usuarioId: string,
+    globalAgenteId?: string
+  ): Promise<{ creados: number; actualizados: number; errores: any[]; totalProcesados: number; promesasCreadas: number; seguimientosCreados: number }>;
 
   /**
    * Obtiene la ficha de detalle estructurado de un cliente.

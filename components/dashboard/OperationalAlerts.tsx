@@ -9,8 +9,37 @@ export function OperationalAlerts({ clientes }: { clientes: any[] | undefined })
   
   if (!clientes) return null;
 
-  const promesasVencidas = clientes.filter(c => c.promesa_pago && c.fecha_promesa && new Date(c.fecha_promesa) < new Date() && c.estado !== 'SALVADA');
-  const sinGestion = clientes.filter(c => c.estado === 'NO CONTESTA' || !c.estado);
+  const msPerDay = 1000 * 60 * 60 * 24;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const getDiasSinSeguimiento = (c: any) => {
+    if (!c.ultima_gestion) return c.dias_mora || 0;
+    const ut = new Date(c.ultima_gestion);
+    return Math.floor((today.getTime() - ut.getTime()) / msPerDay);
+  };
+
+  const promesasVencidas = clientes
+    .filter(c => {
+      if (!c.promesa_pago || !c.fecha_promesa || c.estado === 'SALVADA') return false;
+      const fp = new Date(c.fecha_promesa);
+      const isVencida = fp < today;
+      const noSeguimiento = !c.ultima_gestion || new Date(c.ultima_gestion) < today;
+      return isVencida && noSeguimiento;
+    })
+    .sort((a, b) => {
+      const fa = new Date(a.fecha_promesa!).getTime();
+      const fb = new Date(b.fecha_promesa!).getTime();
+      if (fa !== fb) return fa - fb;
+      if (b.capital !== a.capital) return (b.capital || 0) - (a.capital || 0);
+      return getDiasSinSeguimiento(b) - getDiasSinSeguimiento(a);
+    });
+
+  const sinGestion = clientes.filter(c => {
+    const hasInteraction = c.total_gestiones > 0 || !!c.ultima_gestion;
+    return !hasInteraction;
+  });
+
   const riesgoAlto = clientes.filter(c => c.bucket === 6 && (!c.promesa_pago || c.estado === 'NO SALVADA'));
 
   return (
@@ -32,21 +61,33 @@ export function OperationalAlerts({ clientes }: { clientes: any[] | undefined })
         </div>
       </motion.div>
 
-      {/* Alerta: Sin Gestión */}
+      {/* Alerta: Sin Contacto / Abandonados */}
       <motion.div 
         initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
         onClick={() => router.push('/clientes?filtro=sin_gestion')}
-        className="p-4 rounded-xl border border-amber-500/20 bg-amber-500/5 hover:bg-amber-500/10 cursor-pointer transition-colors flex items-center justify-between group"
+        className="p-4 rounded-xl border border-amber-500/20 bg-amber-500/5 hover:bg-amber-500/10 cursor-pointer transition-colors flex flex-col justify-between group gap-2"
       >
-        <div>
-          <h3 className="text-sm font-bold text-amber-400 flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4" /> Sin Contacto / Abandonados
-          </h3>
-          <p className="text-xs text-amber-300 mt-1">Clientes perdiendo probabilidad de pago</p>
+        <div className="flex justify-between items-start">
+          <div>
+            <h3 className="text-sm font-bold text-amber-400 flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4" /> Sin Contacto / Abandonados
+            </h3>
+            <p className="text-xs text-amber-300 mt-1">Clientes perdiendo probabilidad de pago</p>
+          </div>
+          <div className="text-2xl font-black text-amber-500 group-hover:scale-110 transition-transform">
+            {sinGestion.length}
+          </div>
         </div>
-        <div className="text-2xl font-black text-amber-500 group-hover:scale-110 transition-transform">
-          {sinGestion.length}
-        </div>
+        {sinGestion.length > 0 && (
+          <div className="flex gap-2 mt-2">
+            <span className="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 text-[10px] font-semibold border border-amber-500/30">
+              Prioridad Automática
+            </span>
+            <span className="px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 text-[10px] font-semibold border border-red-500/30">
+              Riesgo Alto
+            </span>
+          </div>
+        )}
       </motion.div>
 
       {/* Inteligencia: Motor de Estrategia */}

@@ -32,7 +32,12 @@ export default function ReportesPage() {
 
   const handleExportDashboardPDF = () => {
     if (!stats) return;
-    exportDashboardPDF(stats);
+    exportDashboardPDF({
+      total_cartera: stats.total_cartera,
+      total_recuperado: stats.total_salvado,
+      total_pendiente: stats.total_pendiente,
+      pct_recuperacion: stats.pct_recuperacion,
+    });
   };
 
   const handleExportExcel = () => {
@@ -45,7 +50,7 @@ export default function ReportesPage() {
       Bucket: c.bucket || '',
       Estado: c.estado,
       Agente: c.agente_nombre || '',
-      Recuperado: c.monto_recuperado,
+      Recuperado: c.monto_salvado,
       WhatsApp: c.whatsapp || '',
     }));
     const blob = generateExcelExport(data, 'clientes');
@@ -67,7 +72,7 @@ export default function ReportesPage() {
       Bucket: c.bucket || '',
       Estado: c.estado,
       Agente: c.agente_nombre || '',
-      Recuperado: c.monto_recuperado,
+      Recuperado: c.monto_salvado,
     }));
     const csv = generateCSVExport(data);
     const blob = new Blob([csv], { type: 'text/csv' });
@@ -99,7 +104,7 @@ export default function ReportesPage() {
           {[
             { label: 'Total Clientes', value: clientes?.length || 0 },
             { label: 'Capital', value: formatCurrency(stats.total_cartera) },
-            { label: 'Recuperado', value: formatCurrency(stats.total_recuperado) },
+            { label: 'Recuperado', value: formatCurrency(stats.total_salvado) },
             { label: 'Recuperación', value: `${stats.pct_recuperacion}%` },
           ].map((s) => (
             <div key={s.label} className="p-3 rounded-xl bg-card border border-white/5 text-center">

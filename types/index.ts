@@ -68,7 +68,7 @@ export interface Cliente {
   prioridad: 'baja' | 'media' | 'alta' | 'urgente';
   empresa: string | null;
   observaciones: string | null;
-  monto_recuperado: number;
+  monto_salvado: number;
   created_at: string;
   updated_at: string;
 }
@@ -117,7 +117,7 @@ export interface ImportLog {
 
 export interface DashboardStats {
   total_cartera: number;
-  total_recuperado: number;
+  total_salvado: number;
   total_pendiente: number;
   total_promesas: number;
   monto_promesas: number;
@@ -149,7 +149,7 @@ export interface AgentKPI {
   full_name: string;
   total_gestiones: number;
   clientes_gestionados: number;
-  recuperado: number;
+  salvado: number;
   salvadas: number;
   promesas_activas: number;
   promesas_cumplidas: number;

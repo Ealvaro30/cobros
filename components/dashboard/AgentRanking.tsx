@@ -67,7 +67,7 @@ export function AgentRanking({ agents, isLoading }: AgentRankingProps) {
 
             {/* KPIs */}
             <div className="text-right flex-shrink-0">
-              <p className="text-sm font-bold text-emerald-400">{formatCurrency(agent.recuperado)}</p>
+              <p className="text-sm font-bold text-emerald-400">{formatCurrency(agent.salvado)}</p>
               <div className="flex items-center gap-1 justify-end mt-1">
                 <Target className="w-3 h-3 text-muted-foreground" />
                 <span className="text-[10px] text-muted-foreground">{agent.efectividad}%</span>

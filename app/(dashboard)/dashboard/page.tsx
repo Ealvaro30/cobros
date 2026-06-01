@@ -15,6 +15,7 @@ import { ClientesStatusDetail } from '@/components/dashboard/ClientesStatusDetai
 import { ProximosClientes } from '@/components/dashboard/ProximosClientes';
 import { OperationalAlerts } from '@/components/dashboard/OperationalAlerts';
 import { CampaignSummaryCard } from '@/components/dashboard/CampaignSummaryCard';
+import { WhatsAppAIKPIs } from '@/components/dashboard/WhatsAppAIKPIs';
 import { motion } from 'framer-motion';
 
 export default function DashboardPage() {
@@ -51,6 +52,14 @@ export default function DashboardPage() {
 
       {/* Operational Alerts & AI Strategy Engine */}
       <OperationalAlerts clientes={clientes} />
+
+      {/* WhatsApp AI Center KPIs */}
+      <div>
+        <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
+          <span className="text-emerald-400">●</span> Centro de Inteligencia Artificial (WhatsApp)
+        </h2>
+        <WhatsAppAIKPIs />
+      </div>
 
       {/* KPI Cards */}
       <KPICards stats={stats} isLoading={statsLoading} />

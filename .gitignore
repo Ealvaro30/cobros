@@ -3,3 +3,15 @@ node_modules
 .env.local
 .env
 *.log
+
+# WhatsApp service
+whatsapp-service/dist
+whatsapp-service/node_modules
+whatsapp-service/.sessions
+whatsapp-service/tmp
+
+# managed
+**.data.json
+**.node-persist**
+**_IGNORE_**
+# end managed

@@ -34,7 +34,7 @@ export function FinancialCharts({ stats, bucketStats, isLoading }: FinancialChar
   const portfolioData = [
     { 
       name: 'Recuperado', 
-      value: currency === 'NIO' ? (stats?.total_recuperado || 0) : (stats?.total_recuperado || 0) / rate, 
+      value: currency === 'NIO' ? (stats?.total_salvado || 0) : (stats?.total_salvado || 0) / rate, 
       color: '#10b981' 
     },
     { 

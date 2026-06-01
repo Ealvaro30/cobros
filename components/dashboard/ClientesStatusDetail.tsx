@@ -4,6 +4,7 @@ import { useState } from 'react';
 import type { ClienteDetalle } from '@/types';
 import { formatCurrency } from '@/lib/utils/index';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useUIStore } from '@/stores/uiStore';
 import {
   CheckCircle,
   XCircle,
@@ -28,6 +29,7 @@ interface ClientesStatusDetailProps {
 export function ClientesStatusDetail({ clientes, isLoading }: ClientesStatusDetailProps) {
   const [activeTab, setActiveTab] = useState<'promesas' | 'salvados' | 'nosalvados'>('promesas');
   const [selectedClienteId, setSelectedClienteId] = useState<string | null>(null);
+  const { setPendingCallClientId } = useUIStore();
 
   if (isLoading) {
     return <div className="h-64 skeleton rounded-xl" />;
@@ -281,6 +283,7 @@ export function ClientesStatusDetail({ clientes, isLoading }: ClientesStatusDeta
                         {cliente.telefono && (
                           <a
                             href={`tel:${cliente.telefono}`}
+                            onClick={() => setPendingCallClientId(cliente.id)}
                             className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold flex items-center gap-1.5 text-muted-foreground hover:text-white transition-colors"
                           >
                             <Phone className="w-3.5 h-3.5" />

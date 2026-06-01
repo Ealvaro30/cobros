@@ -1,4 +1,4 @@
-import { Entity } from '../shared/Entity';
+import { AggregateRoot } from '../shared/AggregateRoot';
 import { Money, DiasMora, PhoneNumber, EmailAddress } from '../shared/ValueObjects';
 import { Bucket, BucketValue } from './Bucket';
 
@@ -45,7 +45,7 @@ export interface ClientProps {
  * Entidad Agregada Cliente (DDD Aggregate Root).
  * Modela un cliente moroso y encapsula las reglas de negocio financieras.
  */
-export class Client extends Entity<ClientProps> {
+export class Client extends AggregateRoot<ClientProps> {
   private constructor(props: ClientProps, id?: string) {
     super(props, id);
   }
@@ -57,7 +57,7 @@ export class Client extends Entity<ClientProps> {
     if (!props.nombre || props.nombre.trim() === '') {
       throw new Error('El nombre del cliente es obligatorio.');
     }
-    return new Client(
+    const client = new Client(
       {
         ...props,
         fechaRegistro: props.fechaRegistro || new Date(),
@@ -66,6 +66,15 @@ export class Client extends Entity<ClientProps> {
       },
       id
     );
+
+    client.addDomainEvent('CLIENT_CREATED', {
+      clienteId: client.id,
+      nombre: client.props.nombre,
+      capital: client.props.capital.amount,
+      estado: client.props.estado,
+    });
+
+    return client;
   }
 
   // --- Getters de Propiedades ---
@@ -114,14 +123,26 @@ export class Client extends Entity<ClientProps> {
     this.props.agenteId = agenteId;
     this.props.fechaAsignacion = new Date();
     this.props.updatedAt = new Date();
+
+    this.addDomainEvent('CLIENT_ASSIGNED', {
+      clienteId: this.id,
+      agenteId,
+    });
   }
 
   /**
    * Actualiza los días de mora del cliente y provoca el recálculo automático del Bucket.
    */
   public actualizarDiasMora(dias: number): void {
+    const viejosDias = this.props.diasMora.value;
     this.props.diasMora = DiasMora.create(dias);
     this.props.updatedAt = new Date();
+
+    this.addDomainEvent('CLIENT_UPDATED', {
+      clienteId: this.id,
+      viejosDias,
+      nuevosDias: dias,
+    });
   }
 
   /**
@@ -133,6 +154,7 @@ export class Client extends Entity<ClientProps> {
     montoPromesa: number = 0,
     fechaPromesa: Date | null = null
   ): void {
+    const viejoEstado = this.props.estado;
     this.props.estado = nuevoEstado;
     this.props.promesaPago = promesaPago;
     
@@ -154,6 +176,15 @@ export class Client extends Entity<ClientProps> {
     }
 
     this.props.updatedAt = new Date();
+
+    this.addDomainEvent('CLIENT_STATUS_CHANGED', {
+      clienteId: this.id,
+      viejoEstado,
+      nuevoEstado,
+      promesaPago,
+      montoPromesa,
+      fechaPromesa: fechaPromesa?.toISOString() || null,
+    });
   }
 
   /**
@@ -165,6 +196,7 @@ export class Client extends Entity<ClientProps> {
     }
     
     this.props.montoRecuperado = this.props.montoRecuperado.add(monto);
+    const viejoSaldo = this.props.saldoDolares.amount;
     
     // Si el capital recuperado supera el saldo actual, se ajusta a cero (amortización total)
     if (monto.amount >= this.props.saldoDolares.amount) {
@@ -175,5 +207,13 @@ export class Client extends Entity<ClientProps> {
     }
     
     this.props.updatedAt = new Date();
+
+    this.addDomainEvent('CLIENT_SCORE_UPDATED', {
+      clienteId: this.id,
+      montoPago: monto.amount,
+      viejoSaldo,
+      nuevoSaldo: this.props.saldoDolares.amount,
+      estado: this.props.estado,
+    });
   }
 }

@@ -99,7 +99,7 @@ CREATE TABLE clientes (
   correo TEXT,
   empresa TEXT,
   observaciones TEXT,
-  monto_recuperado NUMERIC(15,2) DEFAULT 0,
+  monto_salvado NUMERIC(15,2) DEFAULT 0,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

@@ -6,6 +6,8 @@ import { createClient } from '@/lib/supabase/client';
 import { useAuthStore } from '@/stores/authStore';
 import { Sidebar } from '@/components/shared/Sidebar';
 import { Header } from '@/components/shared/Header';
+import { WhatsAppPermissionModal } from '@/components/shared/WhatsAppPermissionModal';
+import { CallResultModal } from '@/components/shared/CallResultModal';
 import { useUIStore } from '@/stores/uiStore';
 import type { Profile } from '@/types';
 
@@ -75,6 +77,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <Header />
         <main className="flex-1 p-4 lg:p-6 overflow-auto">{children}</main>
       </div>
+      <WhatsAppPermissionModal />
+      <CallResultModal />
     </div>
   );
 }

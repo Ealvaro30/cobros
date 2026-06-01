@@ -22,7 +22,7 @@ interface KPICardsProps {
 
 const cards = [
   { key: 'total_cartera', label: 'Total Cartera', icon: Wallet, color: 'from-primary/80 to-primary/40', glow: 'glow-blue', format: 'currency', route: '/clientes' },
-  { key: 'total_recuperado', label: 'Recuperado', icon: TrendingUp, color: 'from-success/80 to-success/40', glow: 'glow-green', format: 'currency', route: '/clientes' },
+  { key: 'total_recuperado', label: 'Salvado', icon: TrendingUp, color: 'from-success/80 to-success/40', glow: 'glow-green', format: 'currency', route: '/clientes' },
   { key: 'total_pendiente', label: 'Pendiente', icon: Clock, color: 'from-secondary/80 to-secondary/40', glow: 'glow-amber', format: 'currency', route: '/clientes' },
   { key: 'monto_promesas', label: 'Promesas', icon: HandshakeIcon, color: 'from-accent/80 to-accent/40', glow: '', format: 'currency', route: '/calendario' },
   { key: 'pct_recuperacion', label: '% Recuperación', icon: Percent, color: 'from-success/60 to-success/30', glow: '', format: 'percent', route: '/clientes' },

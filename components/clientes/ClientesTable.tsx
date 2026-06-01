@@ -189,7 +189,7 @@ export function ClientesTable({ data, onView, onEdit, onDelete, isLoading }: Cli
           </button>
         ),
         cell: ({ row }) => (
-          <span className="text-sm text-emerald-400 font-medium">{formatCurrency(row.original.monto_recuperado)}</span>
+          <span className="text-sm text-emerald-400 font-medium">{formatCurrency(row.original.monto_salvado)}</span>
         ),
       },
       {

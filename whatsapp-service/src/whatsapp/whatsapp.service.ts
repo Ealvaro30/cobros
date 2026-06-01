@@ -122,7 +122,7 @@ export class WhatsappService implements OnModuleInit, OnModuleDestroy {
           })
           .select()
           .single();
-          
+
         if (newMsg) {
           await supabase.from('ai_analysis_logs').insert({
             message_id: newMsg.id,
@@ -136,7 +136,7 @@ export class WhatsappService implements OnModuleInit, OnModuleDestroy {
       // 5. Update client state & create gestion if promise or follow up detected
       if (clienteId && (aiAnalysis.promesa_pago || aiAnalysis.seguimiento)) {
         const resultado = aiAnalysis.promesa_pago ? 'PROMESA DE PAGO' : 'VOLVER A LLAMAR';
-        
+
         await supabase.from('gestiones').insert({
           cliente_id: clienteId,
           agente_id: cliente.agente_id, // Asignar al mismo agente del cliente

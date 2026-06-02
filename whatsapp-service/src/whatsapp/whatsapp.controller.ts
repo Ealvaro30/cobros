@@ -3,7 +3,7 @@ import { WhatsappService } from './whatsapp.service';
 
 @Controller('whatsapp')
 export class WhatsappController {
-  constructor(private readonly whatsappService: WhatsappService) {}
+  constructor(private readonly whatsappService: WhatsappService) { }
 
   @Get('status')
   getStatus() {

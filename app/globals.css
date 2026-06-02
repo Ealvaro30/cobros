@@ -32,6 +32,9 @@
     --warning-foreground: 0 0% 100%;
     --info: 217 91% 60%;
     --info-foreground: 0 0% 100%;
+
+    /* Responsive base font size */
+    font-size: 14px;
   }
 
   .dark {
@@ -63,16 +66,51 @@
   }
 }
 
+/* ═══════════════════════════════════════
+   RESPONSIVE TYPOGRAPHY
+   ═══════════════════════════════════════ */
 @layer base {
+  /* Mobile: 14px base */
+  :root {
+    font-size: 14px;
+  }
+
+  /* Tablet: 15px */
+  @media (min-width: 768px) {
+    :root {
+      font-size: 15px;
+    }
+  }
+
+  /* Desktop: 16px */
+  @media (min-width: 1024px) {
+    :root {
+      font-size: 16px;
+    }
+  }
+
   * {
     @apply border-border;
+    -webkit-tap-highlight-color: transparent;
   }
+
   body {
     @apply bg-background text-foreground font-sans antialiased;
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+
+  /* Safe area insets for modern phones (notch, etc.) */
+  html {
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
   }
 }
 
+/* ═══════════════════════════════════════
+   COMPONENT CLASSES
+   ═══════════════════════════════════════ */
 @layer components {
   .glass-card {
     @apply bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl;
@@ -107,6 +145,9 @@
     @apply animate-pulse bg-muted rounded;
   }
 
+  /* ═══════════════════════════════════════
+     SCROLLBAR
+     ═══════════════════════════════════════ */
   .scrollbar-thin {
     scrollbar-width: thin;
     scrollbar-color: hsl(var(--muted)) transparent;
@@ -125,8 +166,45 @@
     background: hsl(var(--muted));
     border-radius: 3px;
   }
+
+  /* ═══════════════════════════════════════
+     TOUCH-OPTIMIZED BUTTONS & INPUTS
+     ═══════════════════════════════════════ */
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px];
+  }
+
+  /* ═══════════════════════════════════════
+     RESPONSIVE TABLE UTILITIES
+     ═══════════════════════════════════════ */
+  .table-responsive {
+    @apply overflow-x-auto scrollbar-thin;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .table-responsive table {
+    @apply w-full;
+  }
+
+  .table-responsive thead {
+    @apply sticky top-0 z-10 bg-card;
+  }
+
+  /* ═══════════════════════════════════════
+     RESPONSIVE MODAL
+     ═══════════════════════════════════════ */
+  .modal-responsive {
+    @apply fixed inset-0 z-50 flex items-end sm:items-center justify-center;
+  }
+
+  .modal-responsive .modal-content {
+    @apply w-full sm:w-auto sm:max-w-lg sm:mx-4 rounded-t-2xl sm:rounded-2xl max-h-[90vh] overflow-y-auto;
+  }
 }
 
+/* ═══════════════════════════════════════
+   ANIMATIONS
+   ═══════════════════════════════════════ */
 @layer utilities {
   .animate-in {
     animation: fadeIn 0.5s ease-out forwards;
@@ -135,5 +213,51 @@
   @keyframes fadeIn {
     from { opacity: 0; transform: translateY(8px); }
     to { opacity: 1; transform: translateY(0); }
+  }
+}
+
+/* ═══════════════════════════════════════
+   MOBILE-FIRST RESPONSIVE OPTIMIZATIONS
+   ═══════════════════════════════════════ */
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Optimize touch targets on small screens */
+@media (max-width: 767px) {
+  button,
+  [role="button"],
+  a,
+  input,
+  select,
+  textarea {
+    min-height: 44px;
+  }
+
+  select {
+    font-size: 16px; /* Prevents iOS zoom */
+  }
+
+  input[type="text"],
+  input[type="email"],
+  input[type="number"],
+  input[type="tel"],
+  input[type="search"],
+  input[type="password"],
+  textarea {
+    font-size: 16px; /* Prevents iOS zoom */
+  }
+}
+
+/* Fix for iOS Safari 100vh issue */
+@supports (-webkit-touch-callout: none) {
+  .min-h-screen {
+    min-height: -webkit-fill-available;
   }
 }

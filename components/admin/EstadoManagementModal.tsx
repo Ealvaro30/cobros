@@ -64,16 +64,20 @@ export function EstadoManagementModal({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
+    <div className="modal-responsive bg-black/60 backdrop-blur-sm p-0 sm:p-4">
+      <div className="absolute inset-0" onClick={onClose} />
       <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="relative w-full max-w-md bg-card border border-white/10 rounded-2xl shadow-2xl overflow-hidden"
+        initial={{ opacity: 0, scale: 0.95, y: 100 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 100 }}
+        className="modal-content bg-card border border-white/10 shadow-2xl relative"
       >
         <div className="border-b border-white/5 px-6 py-4 flex items-center justify-between bg-slate-950">
           <h2 className="text-lg font-bold">Gestión de Estados</h2>
-          <button onClick={onClose} className="p-1 rounded-lg hover:bg-white/5 text-slate-400 hover:text-white transition-colors">
+          <button
+            onClick={onClose}
+            className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg hover:bg-white/5 text-slate-400 hover:text-white transition-colors"
+          >
             <X className="w-5 h-5" />
           </button>
         </div>

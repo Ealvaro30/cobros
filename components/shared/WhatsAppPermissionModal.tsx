@@ -24,18 +24,18 @@ export function WhatsAppPermissionModal() {
   return (
     <AnimatePresence>
       {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+        <div className="modal-responsive bg-black/60 backdrop-blur-sm p-0 sm:p-4">
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
+            initial={{ opacity: 0, scale: 0.95, y: 100 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 100 }}
             transition={{ duration: 0.15 }}
-            className="w-full max-w-[425px] border border-emerald-500/20 bg-slate-950 p-6 rounded-2xl shadow-2xl relative overflow-hidden"
+            className="modal-content border border-emerald-500/20 bg-slate-950 p-6 shadow-2xl relative"
           >
             {/* Top Close Button (for convenience) */}
             <button
               onClick={() => setOpen(false)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors"
+              className="absolute top-4 right-4 min-w-[44px] min-h-[44px] flex items-center justify-center text-slate-400 hover:text-white transition-colors rounded-lg hover:bg-white/5"
             >
               <X className="w-5 h-5" />
             </button>
@@ -59,16 +59,16 @@ export function WhatsAppPermissionModal() {
               </p>
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex flex-col-reverse sm:flex-row gap-3">
               <button
                 onClick={() => setOpen(false)}
-                className="flex-1 px-4 py-2.5 rounded-xl border border-white/10 hover:bg-white/5 text-slate-400 hover:text-white transition-colors text-sm font-semibold"
+                className="touch-target flex-1 px-4 border border-white/10 hover:bg-white/5 text-slate-400 hover:text-white transition-colors text-sm font-semibold rounded-xl"
               >
                 Omitir
               </button>
               <button
                 onClick={handleGrantPermission}
-                className="flex-[2] flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold transition-colors text-sm shadow-lg shadow-emerald-950/20"
+                className="touch-target flex-[2] flex items-center justify-center gap-2 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold transition-colors text-sm shadow-lg shadow-emerald-950/20 rounded-xl active:scale-[0.98]"
               >
                 <CheckCircle2 className="w-4 h-4" />
                 Otorgar Permiso

@@ -282,12 +282,12 @@ export function ClientesTable({ data, onView, onEdit, onDelete, isLoading }: Cli
         />
       </div>
 
-      {/* Table */}
-      <div className="overflow-x-auto">
-        <table className="w-full">
+      {/* Table (Desktop/Tablet) */}
+      <div className="hidden md:block table-responsive">
+        <table className="w-full relative">
           <thead>
             {table.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id} className="border-b border-white/5">
+              <tr key={headerGroup.id} className="border-b border-white/5 bg-card">
                 {headerGroup.headers.map((header) => (
                   <th key={header.id} className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
@@ -308,6 +308,78 @@ export function ClientesTable({ data, onView, onEdit, onDelete, isLoading }: Cli
             ))}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobile Card View (Mobile only) */}
+      <div className="md:hidden divide-y divide-white/5">
+        {table.getRowModel().rows.map((row) => (
+          <div key={row.id} className="p-4 space-y-4">
+            {/* Header info */}
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="font-medium text-sm text-white">{row.original.nombre}</p>
+                <div className="flex gap-2 items-center mt-1">
+                  <span className="text-xs text-muted-foreground font-mono">{row.original.id_cliente}</span>
+                  <span className="text-[10px] text-muted-foreground">{formatCedula(row.original.cedula)}</span>
+                </div>
+              </div>
+              <EstadoBadge estado={row.original.estado} />
+            </div>
+
+            {/* Financial Grid */}
+            <div className="grid grid-cols-2 gap-3 bg-white/5 rounded-lg p-3">
+              <div>
+                <p className="text-[10px] text-muted-foreground uppercase">Capital USD</p>
+                <p className="text-sm font-bold text-emerald-400">
+                  {formatCurrencyUSD(row.original.capital / 36.62)}
+                </p>
+              </div>
+              <div>
+                <p className="text-[10px] text-muted-foreground uppercase">Recuperado</p>
+                <p className="text-sm font-medium text-emerald-400">{formatCurrency(row.original.monto_salvado)}</p>
+              </div>
+              <div>
+                <p className="text-[10px] text-muted-foreground uppercase">Días Mora</p>
+                <p className={`text-sm font-bold ${row.original.dias_mora > 150 ? 'text-red-400' : 'text-amber-400'}`}>
+                  {row.original.dias_mora}
+                </p>
+              </div>
+              <div>
+                <p className="text-[10px] text-muted-foreground uppercase">Bucket</p>
+                <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                  row.original.bucket === 6 ? 'bg-red-500/20 text-red-400' : 'bg-amber-500/20 text-amber-400'
+                }`}>
+                  B{row.original.bucket || '-'}
+                </span>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex items-center justify-between pt-2">
+              <div className="text-xs text-muted-foreground flex items-center gap-1">
+                 Agente: {row.original.agente_nombre || 'Sin asignar'}
+              </div>
+              <div className="flex items-center gap-2">
+                <WhatsAppButton whatsapp={row.original.whatsapp} />
+                <button
+                  onClick={() => onView(row.original.id)}
+                  className="w-10 h-10 inline-flex items-center justify-center rounded-lg bg-white/5 hover:bg-white/10 transition-colors touch-target"
+                  title="Ver timeline"
+                >
+                  <Eye className="w-5 h-5 text-muted-foreground" />
+                </button>
+                <button
+                  onClick={() => onEdit(row.original.id)}
+                  className="w-10 h-10 inline-flex items-center justify-center rounded-lg bg-white/5 hover:bg-white/10 transition-colors touch-target"
+                  title="Editar"
+                >
+                  <Edit className="w-5 h-5 text-muted-foreground" />
+                </button>
+                <VisualCardExporter cliente={row.original} />
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* Pagination */}

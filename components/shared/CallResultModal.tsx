@@ -54,18 +54,18 @@ export function CallResultModal() {
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+        <div className="modal-responsive bg-black/60 backdrop-blur-sm p-0 sm:p-4">
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            initial={{ opacity: 0, scale: 0.95, y: 100 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            exit={{ opacity: 0, scale: 0.95, y: 100 }}
             transition={{ duration: 0.2 }}
-            className="w-full max-w-[500px] border border-blue-500/20 bg-slate-950 p-6 rounded-2xl shadow-2xl relative overflow-hidden"
+            className="modal-content border border-blue-500/20 bg-slate-950 p-6 shadow-2xl relative"
           >
             {/* Top Close Button */}
             <button
               onClick={() => setPendingCallClientId(null)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors"
+              className="absolute top-4 right-4 min-w-[44px] min-h-[44px] flex items-center justify-center text-slate-400 hover:text-white transition-colors rounded-lg hover:bg-white/5"
             >
               <X className="w-5 h-5" />
             </button>
@@ -86,12 +86,12 @@ export function CallResultModal() {
                 <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
               </div>
             ) : (
-              <div className="grid grid-cols-2 gap-3 mb-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
                 {results.map((r) => (
                   <button
                     key={r.val}
                     onClick={() => handleResult(r.val, r.prom)}
-                    className={`w-full py-2.5 px-4 rounded-xl font-semibold transition-all text-sm flex items-center justify-center text-center shadow-lg active:scale-[0.98] ${r.color || 'bg-slate-800 hover:bg-slate-700 text-white'}`}
+                    className={`w-full touch-target px-4 rounded-xl font-semibold transition-all text-sm flex items-center justify-center text-center shadow-lg active:scale-[0.98] ${r.color || 'bg-slate-800 hover:bg-slate-700 text-white'}`}
                   >
                     {r.label}
                   </button>
@@ -99,10 +99,10 @@ export function CallResultModal() {
               </div>
             )}
 
-            <div className="flex justify-end border-t border-white/5 pt-4">
+            <div className="flex flex-col-reverse sm:flex-row justify-end border-t border-white/5 pt-4">
               <button
                 onClick={() => setPendingCallClientId(null)}
-                className="px-5 py-2 text-sm font-semibold rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-colors"
+                className="touch-target px-5 font-semibold rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-colors w-full sm:w-auto mt-2 sm:mt-0"
               >
                 Cancelar
               </button>

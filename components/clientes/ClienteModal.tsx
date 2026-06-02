@@ -163,21 +163,21 @@ export function ClienteModal({ cliente, onClose }: ClienteModalProps) {
     }
   };
 
-  const inputClass = 'w-full px-3 py-2 bg-slate-900 border border-white/10 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 placeholder:text-muted-foreground text-white';
-  const labelClass = 'text-xs font-semibold text-muted-foreground flex items-center gap-1';
+  const inputClass = 'w-full px-4 py-3 min-h-[44px] bg-slate-900 border border-white/10 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 placeholder:text-muted-foreground text-white';
+  const labelClass = 'text-xs font-semibold text-muted-foreground flex items-center gap-1 mb-1.5';
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="modal-responsive p-0 sm:p-4">
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
       <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="relative w-full max-w-2xl bg-card border border-white/10 rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto scrollbar-thin"
+        initial={{ opacity: 0, y: 100, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        className="relative modal-content bg-card border border-white/10 shadow-2xl overflow-hidden scrollbar-thin"
       >
         {/* Header */}
         <div className="sticky top-0 z-10 bg-slate-950/90 backdrop-blur-xl border-b border-white/5 px-6 py-4 flex items-center justify-between">
           <h2 className="text-lg font-bold">{isEditing ? 'Editar Cliente' : 'Nuevo Cliente'}</h2>
-          <button onClick={onClose} className="p-1 rounded-lg hover:bg-white/5 text-slate-400 hover:text-white transition-colors">
+          <button onClick={onClose} className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg hover:bg-white/5 text-slate-400 hover:text-white transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -206,9 +206,9 @@ export function ClienteModal({ cliente, onClose }: ClienteModalProps) {
               <input {...register('whatsapp')} className={inputClass} placeholder="+50588888888" />
             </div>
             <div className="flex flex-col gap-2">
-              <label className={labelClass}>
-                <input {...register('unica_operacion')} type="checkbox" className="mr-2 rounded border-white/10 bg-slate-900" />
-                Cliente con única operación
+              <label className="flex items-center gap-3 p-3 bg-slate-900 border border-white/10 rounded-xl min-h-[44px] cursor-pointer touch-target">
+                <input {...register('unica_operacion')} type="checkbox" className="w-5 h-5 rounded border-white/10 bg-slate-800 text-primary focus:ring-primary/50 cursor-pointer" />
+                <span className="text-sm font-semibold text-white">Cliente con única operación</span>
               </label>
               <p className="text-[10px] text-muted-foreground">Ocultar múltiples operaciones si solo tiene un pago mínimo.</p>
             </div>
@@ -222,20 +222,20 @@ export function ClienteModal({ cliente, onClose }: ClienteModalProps) {
             </div>
             <div>
               <label className={labelClass}>Bucket <span className="text-red-400">*</span></label>
-              <select {...register('bucket')} className="w-full px-3 py-2 bg-slate-900 border border-white/10 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 text-white [&>option]:bg-slate-950 [&>option]:text-white">
+              <select {...register('bucket')} className={inputClass + ' [&>option]:bg-slate-950 [&>option]:text-white'}>
                 <option value={5}>Bucket 5 (121 - 150 días)</option>
                 <option value={6}>Bucket 6 (151 - 180 días)</option>
               </select>
             </div>
             <div>
               <label className={labelClass}>Estado <span className="text-red-400">*</span></label>
-              <select {...register('estado')} className="w-full px-3 py-2 bg-slate-900 border border-white/10 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 text-white [&>option]:bg-slate-950 [&>option]:text-white">
+              <select {...register('estado')} className={inputClass + ' [&>option]:bg-slate-950 [&>option]:text-white'}>
                 {ESTADOS.map((e) => <option key={e} value={e}>{e}</option>)}
               </select>
             </div>
             <div>
               <label className={labelClass}>Prioridad</label>
-              <select {...register('prioridad')} className="w-full px-3 py-2 bg-slate-900 border border-white/10 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 text-white [&>option]:bg-slate-950 [&>option]:text-white">
+              <select {...register('prioridad')} className={inputClass + ' [&>option]:bg-slate-950 [&>option]:text-white'}>
                 <option value="baja">Baja</option>
                 <option value="media">Media</option>
                 <option value="alta">Alta</option>
@@ -244,7 +244,7 @@ export function ClienteModal({ cliente, onClose }: ClienteModalProps) {
             </div>
             <div>
               <label className={labelClass}>Campaña <span className="text-red-400">*</span></label>
-              <select {...register('campana_id')} className="w-full px-3 py-2 bg-slate-900 border border-white/10 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 text-white [&>option]:bg-slate-950 [&>option]:text-white">
+              <select {...register('campana_id')} className={inputClass + ' [&>option]:bg-slate-950 [&>option]:text-white'}>
                 <option value="">Seleccionar campaña...</option>
                 {campanias?.map((c) => (
                   <option key={c.id} value={c.id}>
@@ -340,16 +340,16 @@ export function ClienteModal({ cliente, onClose }: ClienteModalProps) {
             </div>
           </div>
 
-          <div className="flex justify-end gap-3 pt-6 border-t border-white/5">
-            <button type="button" onClick={onClose} className="px-4 py-2 text-sm rounded-lg hover:bg-white/5 text-slate-400 hover:text-white transition-colors">
+          <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-6 border-t border-white/5">
+            <button type="button" onClick={onClose} className="px-4 py-3 min-h-[44px] text-sm rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-colors w-full sm:w-auto">
               Cancelar
             </button>
             <button
               type="submit"
               disabled={isSubmittingState}
-              className="px-6 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 text-white text-sm font-semibold rounded-lg hover:from-blue-500 hover:to-cyan-500 disabled:opacity-50 flex items-center gap-2"
+              className="px-6 py-3 min-h-[44px] bg-gradient-to-r from-blue-600 to-cyan-600 text-white text-sm font-semibold rounded-xl hover:from-blue-500 hover:to-cyan-500 disabled:opacity-50 flex items-center justify-center gap-2 w-full sm:w-auto active:scale-[0.98] transition-transform"
             >
-              {isSubmittingState && <Loader2 className="w-4 h-4 animate-spin" />}
+              {isSubmittingState && <Loader2 className="w-5 h-5 animate-spin" />}
               {isEditing ? 'Actualizar' : 'Crear Cliente'}
             </button>
           </div>

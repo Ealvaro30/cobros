@@ -136,8 +136,10 @@ export function ClienteModal({ cliente, onClose }: ClienteModalProps) {
       const sumCapital = operacionesLocal.reduce((acc, curr) => acc + Number(curr.totalOperacion), 0);
       const finalCapital = sumCapital > 0 ? sumCapital : data.capital;
 
-      const cleanedData: ClienteFormData = {
-        ...data,
+      const { prioridad, unica_operacion, ...restData } = data;
+
+      const cleanedData: any = {
+        ...restData,
         capital: finalCapital,
         id_cliente: data.id_cliente || undefined,
         cedula: data.cedula || undefined,
@@ -146,8 +148,6 @@ export function ClienteModal({ cliente, onClose }: ClienteModalProps) {
         agente_id: data.agente_id === '' ? undefined : (data.agente_id || undefined),
         campana_id: data.campana_id === '' ? undefined : (data.campana_id || undefined),
         fecha_promesa: data.fecha_promesa === '' ? undefined : (data.fecha_promesa || undefined),
-        unica_operacion: data.unica_operacion,
-        prioridad: data.prioridad,
         empresa: data.empresa || undefined,
         observaciones: operacionesLocal.length > 0 ? JSON.stringify({ ops: operacionesLocal }) : (data.observaciones || undefined),
       };

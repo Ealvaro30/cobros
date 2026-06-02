@@ -1,11 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Cron, CronExpression } from '@nestjs/schedule';
 import { SupabaseService } from '../supabase/supabase.service';
 import { WhatsappService } from '../whatsapp/whatsapp.service';
-import { ConfigService } from '../config/config.service';
-import PDFDocument from 'pdfkit';
+import { ExcelService } from './excel.service';
+import { PdfService } from './pdf.service';
 import * as fs from 'fs';
-import * as path from 'path';
+import { format } from 'date-fns';
 
 @Injectable()
 export class ReportsService {
@@ -14,95 +13,220 @@ export class ReportsService {
   constructor(
     private readonly supabaseService: SupabaseService,
     private readonly whatsappService: WhatsappService,
-    private readonly configService: ConfigService,
+    private readonly excelService: ExcelService,
+    private readonly pdfService: PdfService,
   ) { }
 
-  @Cron(CronExpression.EVERY_DAY_AT_6PM)
-  async handleDailyReport() {
-    this.logger.log('Iniciando generación de reporte diario de IA...');
+  public async generateDailyReport() {
+    this.logger.log('Starting End of Day Report Generation...');
     try {
-      const pdfPath = await this.generateDailyPDF();
-      await this.sendReportViaWhatsApp(pdfPath);
-      this.logger.log('Reporte diario enviado con éxito.');
-    } catch (error) {
-      this.logger.error('Error generando o enviando reporte diario', error);
-    }
-  }
+      const supabase = this.supabaseService.getClient();
 
-  private async generateDailyPDF(): Promise<string> {
-    return new Promise(async (resolve, reject) => {
-      try {
-        const supabase = this.supabaseService.getClient();
+      // 1. Fetch Config
+      const { data: config } = await supabase
+        .from('whatsapp_config')
+        .select('*')
+        .eq('is_active', true)
+        .single();
 
-        // Fetch stats for today
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-
-        const { count: promises } = await supabase
-          .from('ai_analysis_logs')
-          .select('*', { count: 'exact', head: true })
-          .eq('detected_promise', true)
-          .gte('created_at', today.toISOString());
-
-        const { count: risks } = await supabase
-          .from('whatsapp_messages')
-          .select('*', { count: 'exact', head: true })
-          .eq('ai_risk', 'ALTO')
-          .gte('timestamp', today.toISOString());
-
-        const doc = new PDFDocument();
-        const tmpDir = path.join(__dirname, '../../tmp');
-        if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir);
-
-        const filePath = path.join(tmpDir, `reporte_diario_${Date.now()}.pdf`);
-        const stream = fs.createWriteStream(filePath);
-        doc.pipe(stream);
-
-        // Header
-        doc.fontSize(20).text('GMG Servicios - Resumen de WhatsApp AI', { align: 'center' });
-        doc.moveDown();
-        doc.fontSize(12).text(`Fecha: ${new Date().toLocaleDateString('es-ES')}`);
-        doc.moveDown();
-
-        // Stats
-        doc.fontSize(16).text('Estadísticas Operativas del Día');
-        doc.moveDown();
-        doc.fontSize(12).text(`- Promesas de Pago Detectadas: ${promises || 0}`);
-        doc.text(`- Clientes con Riesgo Alto (Fuga): ${risks || 0}`);
-
-        doc.moveDown();
-        doc.text('Nota: Este reporte es autogenerado por el Centro de Inteligencia Artificial (Claude-3-Haiku).');
-
-        doc.end();
-
-        stream.on('finish', () => resolve(filePath));
-        stream.on('error', reject);
-
-      } catch (err) {
-        reject(err);
+      if (!config) {
+        this.logger.warn('WhatsApp configuration not found or disabled. Skipping report.');
+        return;
       }
-    });
+
+      // 2. Fetch Recipients
+      const { data: recipients } = await supabase
+        .from('whatsapp_report_recipients')
+        .select('phone_number, name')
+        .eq('is_active', true);
+
+      if (!recipients || recipients.length === 0) {
+        this.logger.warn('No active recipients found. Skipping report.');
+        return;
+      }
+
+      // 3. Gather Stats
+      const stats = await this.gatherStats();
+
+      // 4. Generate PDF
+      let pdfPath: string | null = null;
+      if (config.send_pdf) {
+        pdfPath = await this.pdfService.generateSummaryPdf(stats);
+      }
+
+      // 5. Excel path
+      const excelPath = this.excelService.getExcelPath();
+
+      // 6. Generate Summary Text
+      const summaryText = this.buildSummaryText(stats);
+
+      // 7. Send via WhatsApp
+      const client = this.whatsappService.getClient();
+      if (!client) {
+        this.logger.error('WhatsApp client not connected. Cannot send reports.');
+        return;
+      }
+
+      for (const recipient of recipients) {
+        const phone = recipient.phone_number;
+        const formattedPhone = phone.includes('@') ? phone : `${phone}@c.us`;
+
+        try {
+          if (config.send_summary) {
+            await client.sendText(formattedPhone as any, summaryText);
+          }
+
+          if (config.send_pdf && pdfPath) {
+            const pdfBase64 = fs.readFileSync(pdfPath, { encoding: 'base64' });
+            const dataUri = `data:application/pdf;base64,${pdfBase64}`;
+            await client.sendFile(formattedPhone as any, dataUri, 'Reporte_Diario.pdf', 'Reporte PDF');
+          }
+
+          if (config.send_excel && fs.existsSync(excelPath)) {
+            const excelBase64 = fs.readFileSync(excelPath, { encoding: 'base64' });
+            const dataUri = `data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,${excelBase64}`;
+            await client.sendFile(formattedPhone as any, dataUri, 'Plantilla_Clientes_Actualizada.xlsx', 'Reporte Excel Original');
+          }
+
+          this.logger.log(`Report sent to ${recipient.name} (${phone})`);
+          
+          await supabase.from('whatsapp_logs').insert({
+            from_number: 'BOT',
+            to_number: phone,
+            message_type: 'REPORT',
+            status: 'SUCCESS'
+          });
+
+        } catch (sendErr) {
+          this.logger.error(`Error sending report to ${phone}: ${sendErr}`);
+          await supabase.from('whatsapp_logs').insert({
+            from_number: 'BOT',
+            to_number: phone,
+            message_type: 'REPORT',
+            status: 'ERROR',
+            error_detail: (sendErr as Error).message
+          });
+        }
+      }
+
+    } catch (err) {
+      this.logger.error('Failed to generate daily report', err);
+    }
   }
 
-  private async sendReportViaWhatsApp(filePath: string) {
-    const client = this.whatsappService.getClient();
-    const adminPhone = this.configService.get('ADMIN_WHATSAPP_NUMBER'); // ej: '50588888888@c.us'
+  private async gatherStats() {
+    const supabase = this.supabaseService.getClient();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
-    if (!client || !adminPhone) {
-      this.logger.warn('No OpenWA client or ADMIN_WHATSAPP_NUMBER configured.');
-      return;
+    const stats: any = {
+      gestionados: 0,
+      salvados: 0,
+      pendientes: 0,
+      promesas: 0,
+      promesasVencidas: 0,
+      sinRespuesta: 0,
+      rechazos: 0,
+      buckets: {},
+      agentes: []
+    };
+
+    // Get today's gestiones
+    const { data: gestiones } = await supabase
+      .from('gestiones')
+      .select('resultado')
+      .gte('fecha', today.toISOString());
+
+    if (gestiones) {
+      stats.gestionados = gestiones.length;
+      stats.promesas = gestiones.filter((g: any) => g.resultado === 'PROMESA DE PAGO').length;
+      stats.sinRespuesta = gestiones.filter((g: any) => g.resultado === 'NO CONTESTA' || g.resultado === 'BUZON').length;
+      stats.rechazos = gestiones.filter((g: any) => g.resultado === 'NEGATIVA DE PAGO').length;
     }
 
-    const fileBase64 = fs.readFileSync(filePath, { encoding: 'base64' });
-    const dataUri = `data:application/pdf;base64,${fileBase64}`;
+    // Get clients states for buckets, pendientes, etc
+    const { data: clientes } = await supabase
+      .from('clientes')
+      .select('estado, bucket, agente_id');
 
-    const formattedPhone = adminPhone.includes('@') ? adminPhone : `${adminPhone}@c.us`;
+    if (clientes) {
+      stats.salvados = clientes.filter((c: any) => c.estado === 'PAGADO').length;
+      stats.pendientes = clientes.filter((c: any) => c.estado === 'SIN GESTION').length;
 
-    await client.sendFile(
-      formattedPhone as any,
-      dataUri,
-      'reporte_diario_ia.pdf',
-      'Adjunto el reporte consolidado de operaciones y gestión de IA de hoy.'
-    );
+      clientes.forEach((c: any) => {
+        if (c.bucket) {
+          stats.buckets[c.bucket] = (stats.buckets[c.bucket] || 0) + 1;
+        }
+      });
+    }
+
+    // Get Agent stats
+    const { data: agentsData } = await supabase
+      .from('perfiles')
+      .select('id, nombre_completo');
+      
+    if (agentsData && gestiones) {
+        // A full SQL query with grouping would be better, but we can aggregate here
+        const { data: agentGestiones } = await supabase
+          .from('gestiones')
+          .select('agente_id')
+          .gte('fecha', today.toISOString());
+          
+        if(agentGestiones) {
+          const agentCounts: any = {};
+          agentGestiones.forEach((g: any) => {
+            if(g.agente_id) {
+               agentCounts[g.agente_id] = (agentCounts[g.agente_id] || 0) + 1;
+            }
+          });
+          
+          for (const agentId of Object.keys(agentCounts)) {
+             const agent = agentsData.find((a: any) => a.id === agentId);
+             if(agent) {
+               stats.agentes.push({
+                 nombre: agent.nombre_completo,
+                 count: agentCounts[agentId]
+               });
+             }
+          }
+        }
+    }
+
+    return stats;
+  }
+
+  private buildSummaryText(stats: any): string {
+    const dateStr = format(new Date(), 'dd/MM/yyyy');
+    
+    let text = `══════════════════════\n`;
+    text += `*REPORTE FIN DEL DÍA*\n`;
+    text += `══════════════════════\n\n`;
+    text += `Fecha: ${dateStr}\n\n`;
+    text += `Clientes Gestionados: ${stats.gestionados}\n`;
+    text += `Promesas: ${stats.promesas}\n`;
+    text += `Salvados: ${stats.salvados}\n`;
+    text += `Pendientes: ${stats.pendientes}\n\n`;
+
+    for (const [bucket, count] of Object.entries(stats.buckets)) {
+      text += `${bucket}: ${count}\n`;
+    }
+
+    text += `\n`;
+
+    let bestAgent = '';
+    let maxCount = -1;
+    for (const ag of stats.agentes) {
+      if (ag.count > maxCount) {
+        maxCount = ag.count;
+        bestAgent = ag.nombre;
+      }
+    }
+
+    if (bestAgent) {
+      text += `*Agente más productivo:*\n${bestAgent}\n\n`;
+    }
+    
+    text += `══════════════════════`;
+    return text;
   }
 }

@@ -1,16 +1,11 @@
-﻿
-ÔòöÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòù
-Ôòæ          GMG Cobranzas ÔÇö Database Migrations             Ôòæ
-ÔòÜÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòØ
-
 -- GMG Cobranzas: Full Migration Script
--- Generated: 2026-05-26T01:18:56.711Z
+-- Generated: 2026-06-02T01:45:19.778Z
 -- Run this in your Supabase SQL Editor
 
 
 -- ==================== 001_schema.sql ====================
 -- ============================================
--- GMG Cobranzas ÔÇö Schema Principal
+-- GMG Cobranzas — Schema Principal
 -- ============================================
 
 -- Extension UUID
@@ -58,7 +53,7 @@ CREATE INDEX idx_profiles_role ON profiles(role);
 CREATE INDEX idx_profiles_email ON profiles(email);
 
 -- ============================================
--- TABLA: campanas (campa├▒as mensuales)
+-- TABLA: campanas (campañas mensuales)
 -- ============================================
 
 CREATE TABLE campanas (
@@ -149,7 +144,7 @@ CREATE INDEX idx_gestiones_fecha ON gestiones(fecha);
 CREATE INDEX idx_gestiones_resultado ON gestiones(resultado);
 
 -- ============================================
--- TABLA: import_logs (logs de importaci├│n Excel)
+-- TABLA: import_logs (logs de importación Excel)
 -- ============================================
 
 CREATE TABLE import_logs (
@@ -166,7 +161,7 @@ CREATE TABLE import_logs (
 );
 
 -- ============================================
--- TABLA: audit_log (auditor├¡a)
+-- TABLA: audit_log (auditoría)
 -- ============================================
 
 CREATE TABLE audit_log (
@@ -187,7 +182,7 @@ CREATE INDEX idx_audit_fecha ON audit_log(created_at);
 
 -- ==================== 002_rls.sql ====================
 -- ============================================
--- GMG Cobranzas ÔÇö Row Level Security
+-- GMG Cobranzas — Row Level Security
 -- ============================================
 
 -- Enable RLS on all tables
@@ -304,11 +299,11 @@ CREATE POLICY "audit_log_insert" ON audit_log
 
 -- ==================== 003_functions.sql ====================
 -- ============================================
--- GMG Cobranzas ÔÇö Funciones y Triggers
+-- GMG Cobranzas — Funciones y Triggers
 -- ============================================
 
 -- ============================================
--- Trigger: updated_at autom├ítico
+-- Trigger: updated_at automático
 -- ============================================
 
 CREATE OR REPLACE FUNCTION update_updated_at()
@@ -354,7 +349,7 @@ CREATE TRIGGER on_auth_user_created
   FOR EACH ROW EXECUTE FUNCTION handle_new_user();
 
 -- ============================================
--- Trigger: auditor├¡a de clientes
+-- Trigger: auditoría de clientes
 -- ============================================
 
 CREATE OR REPLACE FUNCTION audit_clientes()
@@ -376,7 +371,7 @@ CREATE TRIGGER tr_audit_clientes
   FOR EACH ROW EXECUTE FUNCTION audit_clientes();
 
 -- ============================================
--- Trigger: actualizar cliente al registrar gesti├│n
+-- Trigger: actualizar cliente al registrar gestión
 -- ============================================
 
 CREATE OR REPLACE FUNCTION after_gestion_insert()
@@ -398,7 +393,7 @@ CREATE TRIGGER tr_after_gestion
   FOR EACH ROW EXECUTE FUNCTION after_gestion_insert();
 
 -- ============================================
--- Funci├│n: estad├¡sticas del dashboard
+-- Función: estadísticas del dashboard
 -- ============================================
 
 CREATE OR REPLACE FUNCTION get_dashboard_stats(p_campana_id UUID DEFAULT NULL)
@@ -432,7 +427,7 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- ============================================
--- Funci├│n: estad├¡sticas por bucket
+-- Función: estadísticas por bucket
 -- ============================================
 
 CREATE OR REPLACE FUNCTION get_bucket_stats(p_campana_id UUID DEFAULT NULL)
@@ -466,7 +461,7 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- ============================================
--- Funci├│n: KPIs de agentes
+-- Función: KPIs de agentes
 -- ============================================
 
 CREATE OR REPLACE FUNCTION get_agent_kpis(p_campana_id UUID DEFAULT NULL)
@@ -504,12 +499,12 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- ==================== 004_views.sql ====================
 -- ====================================================
--- GMG Cobranzas ÔÇö Vistas Anal├¡ticas e Hist├│ricas (Views)
+-- GMG Cobranzas — Vistas Analíticas e Históricas (Views)
 -- ====================================================
 
--- 1. Vista: v_bucket_analytics (KPIs de buckets por campa├▒a)
+-- 1. Vista: v_bucket_analytics (KPIs de buckets por campaña)
 -- Formula implementada:
---   Proyecci├│n = Actual + Promesas
+--   Proyección = Actual + Promesas
 --   Falta = Meta - Actual
 --   Cumplimiento % = (Actual / Meta) * 100
 CREATE OR REPLACE VIEW public.v_bucket_analytics AS
@@ -520,7 +515,7 @@ SELECT
   c.mes AS campana_mes,
   c.anio AS campana_anio,
 
-  -- BUCKET 5 (121 - 150 d├¡as de mora)
+  -- BUCKET 5 (121 - 150 días de mora)
   COUNT(cl.id) FILTER (WHERE cl.bucket = 5) AS bucket5_total_clientes,
   COALESCE(SUM(cl.capital) FILTER (WHERE cl.bucket = 5), 0) AS bucket5_capital,
   COALESCE(SUM(cl.monto_recuperado) FILTER (WHERE cl.bucket = 5), 0) AS bucket5_actual,
@@ -535,7 +530,7 @@ SELECT
     ELSE 0.00
   END AS bucket5_cumplimiento,
 
-  -- BUCKET 6 (151 - 180 d├¡as de mora)
+  -- BUCKET 6 (151 - 180 días de mora)
   COUNT(cl.id) FILTER (WHERE cl.bucket = 6) AS bucket6_total_clientes,
   COALESCE(SUM(cl.capital) FILTER (WHERE cl.bucket = 6), 0) AS bucket6_capital,
   COALESCE(SUM(cl.monto_recuperado) FILTER (WHERE cl.bucket = 6), 0) AS bucket6_actual,
@@ -601,7 +596,7 @@ GROUP BY p.id, p.full_name, p.avatar_url;
 
 -- ==================== 005_calendar_view.sql ====================
 -- ====================================================
--- GMG Cobranzas ÔÇö Vista de Agenda Unificada (Calendar)
+-- GMG Cobranzas — Vista de Agenda Unificada (Calendar)
 -- ====================================================
 
 CREATE OR REPLACE VIEW public.v_promesas_proximas AS
@@ -626,7 +621,7 @@ ORDER BY cl.fecha_promesa ASC;
 
 -- ==================== 006_overhaul_schema.sql ====================
 -- ====================================================
--- GMG Cobranzas ÔÇö Migraci├│n de Overhaul e Integridad Financiera
+-- GMG Cobranzas — Migración de Overhaul e Integridad Financiera
 -- ====================================================
 
 -- 1. Desactivar vistas dependientes de clientes.bucket temporalmente
@@ -650,7 +645,7 @@ BEGIN
   ) dup;
 
   IF dup_count > 0 THEN
-    -- A. Crear tabla temporal para mapear duplicados al ID que conservaremos (el m├ís recientemente actualizado)
+    -- A. Crear tabla temporal para mapear duplicados al ID que conservaremos (el más recientemente actualizado)
     CREATE TEMP TABLE duplicate_clients_mapping AS
     WITH ranked_clients AS (
       SELECT 
@@ -665,13 +660,13 @@ BEGIN
     FROM ranked_clients
     WHERE rn > 1;
 
-    -- B. Re-asignar todas las gestiones de los clientes duplicados al cliente conservado para evitar p├®rdidas de historial
+    -- B. Re-asignar todas las gestiones de los clientes duplicados al cliente conservado para evitar pérdidas de historial
     UPDATE public.gestiones g
     SET cliente_id = m.keep_id
     FROM duplicate_clients_mapping m
     WHERE g.cliente_id = m.duplicate_id;
 
-    -- C. Eliminar los registros de clientes duplicados remanentes (ahora libres de referencias de llave for├ínea)
+    -- C. Eliminar los registros de clientes duplicados remanentes (ahora libres de referencias de llave foránea)
     DELETE FROM public.clientes
     WHERE id IN (SELECT duplicate_id FROM duplicate_clients_mapping);
 
@@ -680,15 +675,15 @@ BEGIN
   END IF;
 END $$;
 
--- Limpiar espacios en blanco alrededor de las c├®dulas existentes
+-- Limpiar espacios en blanco alrededor de las cédulas existentes
 UPDATE public.clientes 
 SET cedula = TRIM(cedula) 
 WHERE cedula IS NOT NULL;
 
--- Aplicar la restricci├│n ├║nica de c├®dula de forma segura
+-- Aplicar la restricción única de cédula de forma segura
 ALTER TABLE public.clientes ADD CONSTRAINT uq_clientes_cedula UNIQUE (cedula);
 
--- 3. Crear tabla settings para par├ímetros globales centralizados
+-- 3. Crear tabla settings para parámetros globales centralizados
 CREATE TABLE IF NOT EXISTS public.settings (
   key TEXT PRIMARY KEY,
   value TEXT NOT NULL,
@@ -698,7 +693,7 @@ CREATE TABLE IF NOT EXISTS public.settings (
 
 -- Insertar tipo de cambio oficial por defecto (36.62)
 INSERT INTO public.settings (key, value, description)
-VALUES ('tipo_cambio', '36.62', 'Tipo de cambio oficial (C├│rdobas a D├│lares)')
+VALUES ('tipo_cambio', '36.62', 'Tipo de cambio oficial (Córdobas a Dólares)')
 ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;
 
 -- Habilitar Row Level Security (RLS) en la tabla settings
@@ -718,14 +713,14 @@ CREATE POLICY "settings_all_admin" ON public.settings
 ALTER TABLE public.clientes DROP COLUMN IF EXISTS bucket;
 ALTER TABLE public.clientes ADD COLUMN bucket INTEGER CHECK (bucket IN (5, 6)) DEFAULT 5;
 
--- Poblar valores existentes de bucket seg├║n los d├¡as de mora hist├│ricos
+-- Poblar valores existentes de bucket según los días de mora históricos
 UPDATE public.clientes 
 SET bucket = CASE 
   WHEN dias_mora >= 151 THEN 6 
   ELSE 5 
 END;
 
--- 5. Trigger: Saneamiento de cadenas vac├¡as a NULL para evitar colisiones de unicidad (cedula, id_cliente)
+-- 5. Trigger: Saneamiento de cadenas vacías a NULL para evitar colisiones de unicidad (cedula, id_cliente)
 CREATE OR REPLACE FUNCTION public.clean_empty_client_fields()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -750,7 +745,7 @@ BEFORE INSERT OR UPDATE ON public.clientes
 FOR EACH ROW
 EXECUTE FUNCTION public.clean_empty_client_fields();
 
--- 6. Trigger: Sincronizar autom├íticamente d├¡as de mora al ingresar o cambiar un bucket (para compatibilidad de backend)
+-- 6. Trigger: Sincronizar automáticamente días de mora al ingresar o cambiar un bucket (para compatibilidad de backend)
 CREATE OR REPLACE FUNCTION public.sync_cliente_bucket_mora()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -829,19 +824,19 @@ ORDER BY cl.fecha_promesa ASC;
 
 -- ==================== 007_assignment_audit.sql ====================
 -- ====================================================
--- GMG Cobranzas ÔÇö Migraci├│n de Auditor├¡a y Gesti├│n de Agentes
+-- GMG Cobranzas — Migración de Auditoría y Gestión de Agentes
 -- ====================================================
 
 -- 1. Agregar columnas codigo y disponibilidad a la tabla profiles
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS codigo TEXT UNIQUE;
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS disponibilidad BOOLEAN DEFAULT true;
 
--- Poblar c├│digos por defecto para usuarios existentes que no lo tengan
+-- Poblar códigos por defecto para usuarios existentes que no lo tengan
 UPDATE public.profiles 
 SET codigo = 'AGT-' || UPPER(SUBSTRING(id::text FROM 1 FOR 4)) 
 WHERE codigo IS NULL;
 
--- 2. Crear tabla de historial de asignaciones para auditor├¡a completa
+-- 2. Crear tabla de historial de asignaciones para auditoría completa
 CREATE TABLE IF NOT EXISTS public.assignment_history (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   cliente_id UUID NOT NULL REFERENCES public.clientes(id) ON DELETE CASCADE,
@@ -852,7 +847,7 @@ CREATE TABLE IF NOT EXISTS public.assignment_history (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Crear ├¡ndices de velocidad
+-- Crear índices de velocidad
 CREATE INDEX IF NOT EXISTS idx_assignment_history_cliente ON public.assignment_history(cliente_id);
 CREATE INDEX IF NOT EXISTS idx_assignment_history_anterior ON public.assignment_history(agente_anterior_id);
 CREATE INDEX IF NOT EXISTS idx_assignment_history_nuevo ON public.assignment_history(nuevo_agente_id);
@@ -860,7 +855,7 @@ CREATE INDEX IF NOT EXISTS idx_assignment_history_nuevo ON public.assignment_his
 -- 3. Habilitar Row Level Security (RLS) en la nueva tabla
 ALTER TABLE public.assignment_history ENABLE ROW LEVEL SECURITY;
 
--- 4. Crear pol├¡ticas de seguridad RLS
+-- 4. Crear políticas de seguridad RLS
 DROP POLICY IF EXISTS "history_select_all" ON public.assignment_history;
 CREATE POLICY "history_select_all" ON public.assignment_history
   FOR SELECT TO authenticated USING (true);
@@ -927,7 +922,7 @@ CREATE INDEX IF NOT EXISTS idx_clientes_bucket ON public.clientes(bucket);
 CREATE INDEX IF NOT EXISTS idx_clientes_estado ON public.clientes(estado);
 CREATE INDEX IF NOT EXISTS idx_gestiones_created_at ON public.gestiones(created_at);
 
--- 6. Update any dependent views (example placeholder ÔÇô actual view definitions should be adjusted in later migration)
+-- 6. Update any dependent views (example placeholder – actual view definitions should be adjusted in later migration)
 -- ALTER VIEW v_clientes_detalle ...; -- To be updated according to new schema
 
 COMMIT;
@@ -1051,7 +1046,7 @@ SELECT
   c.mes AS campana_mes,
   c.anio AS campana_anio,
 
-  -- BUCKET 5 (121 - 150 d├¡as de mora)
+  -- BUCKET 5 (121 - 150 días de mora)
   COUNT(cl.id) FILTER (WHERE cl.bucket = 5) AS bucket5_total_clientes,
   COALESCE(SUM(cl.capital) FILTER (WHERE cl.bucket = 5), 0) AS bucket5_capital,
   COALESCE(SUM(cl.capital) FILTER (WHERE cl.bucket = 5 AND cl.estado = 'SALVADA'), 0) AS bucket5_actual,
@@ -1066,7 +1061,7 @@ SELECT
     ELSE 0.00
   END AS bucket5_cumplimiento,
 
-  -- BUCKET 6 (151 - 180 d├¡as de mora)
+  -- BUCKET 6 (151 - 180 días de mora)
   COUNT(cl.id) FILTER (WHERE cl.bucket = 6) AS bucket6_total_clientes,
   COALESCE(SUM(cl.capital) FILTER (WHERE cl.bucket = 6), 0) AS bucket6_capital,
   COALESCE(SUM(cl.capital) FILTER (WHERE cl.bucket = 6 AND cl.estado = 'SALVADA'), 0) AS bucket6_actual,
@@ -1118,10 +1113,10 @@ CHECK (prioridad IN ('baja', 'media', 'alta', 'urgente'));
 
 -- ==================== 012_whatsapp_ai_center.sql ====================
 -- ====================================================
--- GMG Cobranzas ÔÇö WhatsApp AI Center Schema
+-- GMG Cobranzas — WhatsApp AI Center Schema
 -- ====================================================
 
--- 1. Tabla global de configuraci├│n WhatsApp
+-- 1. Tabla global de configuración WhatsApp
 CREATE TABLE IF NOT EXISTS public.whatsapp_config (
   id SERIAL PRIMARY KEY,
   pdf_destination_number TEXT,
@@ -1167,7 +1162,7 @@ CREATE TABLE IF NOT EXISTS public.whatsapp_messages (
 CREATE INDEX idx_wa_msg_conv ON public.whatsapp_messages(conversation_id);
 CREATE INDEX idx_wa_msg_timestamp ON public.whatsapp_messages(timestamp);
 
--- 4. M├®tricas y Logs de IA
+-- 4. Métricas y Logs de IA
 CREATE TABLE IF NOT EXISTS public.ai_analysis_logs (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   message_id UUID REFERENCES public.whatsapp_messages(id) ON DELETE CASCADE,
@@ -1179,7 +1174,7 @@ CREATE TABLE IF NOT EXISTS public.ai_analysis_logs (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- 5. Tabla de env├¡os PDF
+-- 5. Tabla de envíos PDF
 CREATE TABLE IF NOT EXISTS public.pdf_reports_log (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   report_date DATE NOT NULL DEFAULT CURRENT_DATE,
@@ -1204,4 +1199,88 @@ CREATE POLICY "ai_logs_all" ON public.ai_analysis_logs FOR ALL USING (true);
 
 ALTER TABLE public.pdf_reports_log ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "pdf_logs_all" ON public.pdf_reports_log FOR ALL USING (true);
+
+
+-- ==================== 013_whatsapp_reports_config.sql ====================
+-- Migration 013: WhatsApp Reports Configuration
+
+-- 1. whatsapp_config
+CREATE TABLE whatsapp_config (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    bot_number TEXT,
+    schedule_time TIME NOT NULL DEFAULT '18:00:00',
+    send_excel BOOLEAN NOT NULL DEFAULT true,
+    send_pdf BOOLEAN NOT NULL DEFAULT true,
+    send_summary BOOLEAN NOT NULL DEFAULT true,
+    is_active BOOLEAN NOT NULL DEFAULT true,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Ensure only one row exists for config
+CREATE UNIQUE INDEX whatsapp_config_single_row ON whatsapp_config ((1));
+
+-- Insert default config
+INSERT INTO whatsapp_config (schedule_time, is_active) VALUES ('18:00:00', true) ON CONFLICT DO NOTHING;
+
+-- 2. whatsapp_report_recipients
+CREATE TABLE whatsapp_report_recipients (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    phone_number TEXT NOT NULL,
+    name TEXT,
+    is_active BOOLEAN NOT NULL DEFAULT true,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 3. whatsapp_logs
+CREATE TABLE whatsapp_logs (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    timestamp TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    from_number TEXT,
+    to_number TEXT,
+    message_type TEXT NOT NULL,
+    status TEXT NOT NULL,
+    error_detail TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- RLS Policies
+ALTER TABLE whatsapp_config ENABLE ROW LEVEL SECURITY;
+ALTER TABLE whatsapp_report_recipients ENABLE ROW LEVEL SECURITY;
+ALTER TABLE whatsapp_logs ENABLE ROW LEVEL SECURITY;
+
+-- Allow ADMIN and SUPERVISOR to manage config
+CREATE POLICY "Admin and Supervisor can manage whatsapp_config" 
+ON whatsapp_config FOR ALL 
+USING (
+  auth.uid() IN (SELECT id FROM perfiles WHERE rol IN ('ADMIN', 'SUPERVISOR'))
+);
+
+-- Allow service role full access (for NestJS backend)
+CREATE POLICY "Service role can manage whatsapp_config" 
+ON whatsapp_config FOR ALL 
+USING (auth.jwt() ->> 'role' = 'service_role');
+
+-- Same for recipients
+CREATE POLICY "Admin and Supervisor can manage whatsapp_report_recipients" 
+ON whatsapp_report_recipients FOR ALL 
+USING (
+  auth.uid() IN (SELECT id FROM perfiles WHERE rol IN ('ADMIN', 'SUPERVISOR'))
+);
+
+CREATE POLICY "Service role can manage whatsapp_report_recipients" 
+ON whatsapp_report_recipients FOR ALL 
+USING (auth.jwt() ->> 'role' = 'service_role');
+
+-- Same for logs
+CREATE POLICY "Admin and Supervisor can read whatsapp_logs" 
+ON whatsapp_logs FOR SELECT 
+USING (
+  auth.uid() IN (SELECT id FROM perfiles WHERE rol IN ('ADMIN', 'SUPERVISOR'))
+);
+
+CREATE POLICY "Service role can manage whatsapp_logs" 
+ON whatsapp_logs FOR ALL 
+USING (auth.jwt() ->> 'role' = 'service_role');
 

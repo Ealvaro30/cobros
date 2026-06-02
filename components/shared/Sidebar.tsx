@@ -18,6 +18,7 @@ import {
   ChevronRight,
   Award,
   UserCog,
+  MessageSquare,
 } from 'lucide-react';
 
 const navItems = [
@@ -31,6 +32,7 @@ const navItems = [
   { href: '/importar', label: 'Importar', icon: Upload, roles: ['ADMIN', 'SUPERVISOR'] },
   { href: '/reportes', label: 'Reportes', icon: BarChart3, roles: ['ADMIN', 'SUPERVISOR'] },
   { href: '/admin', label: 'Admin', icon: Settings, roles: ['ADMIN'] },
+  { href: '/admin/whatsapp', label: 'WhatsApp Bot', icon: MessageSquare, roles: ['ADMIN', 'SUPERVISOR'] },
 ];
 
 export function Sidebar() {

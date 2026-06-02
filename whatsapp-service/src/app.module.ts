@@ -5,6 +5,7 @@ import { ConfigModule } from './config/config.module';
 import { RedisModule } from './redis/redis.module';
 import { SupabaseModule } from './supabase/supabase.module';
 import { ReportsModule } from './reports/reports.module';
+import { ExcelModule } from './reports/excel.module';
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { ReportsModule } from './reports/reports.module';
     RedisModule,
     SupabaseModule,
     AiModule,
+    ExcelModule,
     WhatsappModule,
     ReportsModule,
   ],

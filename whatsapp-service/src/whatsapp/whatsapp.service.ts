@@ -2,15 +2,19 @@ import { Injectable, OnModuleInit, OnModuleDestroy, Logger } from '@nestjs/commo
 import { create, Client, Message } from '@open-wa/wa-automate';
 import { AiService } from '../ai/ai.service';
 import { SupabaseService } from '../supabase/supabase.service';
+import { ExcelService } from '../reports/excel.service';
 
 @Injectable()
 export class WhatsappService implements OnModuleInit, OnModuleDestroy {
   private client: Client | null = null;
   private readonly logger = new Logger(WhatsappService.name);
+  private currentQrCode: string | null = null;
+  private connectionState: string = 'INITIALIZING';
 
   constructor(
     private readonly aiService: AiService,
     private readonly supabaseService: SupabaseService,
+    private readonly excelService: ExcelService,
   ) { }
 
   async onModuleInit() {
@@ -34,6 +38,11 @@ export class WhatsappService implements OnModuleInit, OnModuleDestroy {
         qrRefreshS: 15,
         throwErrorOnTosBlock: false,
         useChrome: false,
+        catchQR: (qrCode, asciiQR, attempt, urlCode) => {
+          this.logger.log(`New QR Code received (Attempt ${attempt})`);
+          this.currentQrCode = qrCode;
+          this.connectionState = 'WAITING_FOR_QR';
+        },
       });
 
       this.logger.log('✅ OpenWA Client successfully initialized.');
@@ -48,6 +57,10 @@ export class WhatsappService implements OnModuleInit, OnModuleDestroy {
 
     this.client.onStateChanged((state) => {
       this.logger.log(`WhatsApp state changed: ${state}`);
+      this.connectionState = state;
+      if (state === 'CONNECTED') {
+        this.currentQrCode = null;
+      }
       if (state === 'CONFLICT' || state === 'UNLAUNCHED') {
         this.client?.forceRefocus();
       }
@@ -157,6 +170,15 @@ export class WhatsappService implements OnModuleInit, OnModuleDestroy {
             monto_promesa: aiAnalysis.monto_promesa || cliente.monto_promesa
           })
           .eq('id', clienteId);
+          
+        // Sync to Excel template
+        await this.excelService.updateClientRow({
+          id: clienteId,
+          telefono,
+          estado: resultado,
+          promesa_pago: aiAnalysis.promesa_pago,
+          bucket: cliente.bucket,
+        });
       }
 
     } catch (err) {
@@ -172,5 +194,23 @@ export class WhatsappService implements OnModuleInit, OnModuleDestroy {
 
   public getClient(): Client | null {
     return this.client;
+  }
+
+  public getStatus() {
+    return {
+      state: this.connectionState,
+      qrCode: this.currentQrCode,
+    };
+  }
+
+  public async restartSession() {
+    this.logger.log('Restarting WhatsApp session...');
+    if (this.client) {
+      await this.client.kill();
+      this.client = null;
+    }
+    this.currentQrCode = null;
+    this.connectionState = 'INITIALIZING';
+    await this.onModuleInit();
   }
 }
